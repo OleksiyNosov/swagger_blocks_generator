@@ -1,11 +1,49 @@
 class SwaggerBlocksGenerator
   TAB = 2
 
-  def generate_properties data
-    data.map { |key, value| render_property(key, value) }.join("\n")
+  def generate_swagger_shema_create data, space = 0
+    [
+      "#{ front_space(space) }swagger_schema :Input#{ data[:name].capitalize }Create do",
+      generate_model(data, space + TAB),
+      "#{ front_space(space) }end"
+    ].join("\n")
+  end
+
+  def generate_swagger_shema_update data, space = 0
+    [
+      "#{ front_space(space) }swagger_schema :Input#{ data[:name].capitalize }Update do",
+      generate_model(data, space + TAB),
+      "#{ front_space(space) }end"
+    ].join("\n")
+  end
+
+  def generate_swagger_shema_output data, space = 0
+    [
+      "#{ front_space(space) }swagger_schema :Output#{ data[:name].capitalize } do",
+      generate_model(data, space + TAB),
+      "#{ front_space(space) }end"
+    ].join("\n")
+  end
+
+  def generate_model data, space = 0
+    [
+      "#{ front_space(space) }key :required, #{ data[:required].to_s }",
+      "#{ front_space(space) }key :type, :object",
+      "#{ front_space(space) }property :#{ data[:name] } do",
+      generate_properties(data[:attributes], space + TAB),
+      "#{ front_space(space) }end"
+    ].join("\n")
+  end
+
+  def generate_properties data, space = 0
+    data.map { |key, value| render_property(key, value, space) }.join("\n")
   end
 
   private
+  def front_space space = 0
+    ' ' * space
+  end
+
   def render_property key, value, space = 0
     [
       "#{ front_space(space) }property :#{ key } do",
@@ -36,10 +74,6 @@ class SwaggerBlocksGenerator
     else
       "#{ key } #{ value }"
     end
-  end
-
-  def front_space space = 0
-    ' ' * space
   end
 
   def render_attribute_string key, value, space = 0
